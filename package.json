@@ -1,6 +1,6 @@
 {
   "name": "honion",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1-alpha.1",
   "description": "通用洋葱模型中间件",
   "engines": {
     "node": ">=12.14.0"
@@ -11,6 +11,7 @@
     "url": "https://github.com/hal-wang/honion"
   },
   "keywords": [
+    "onion",
     "honion",
     "middleware"
   ],
