@@ -1,0 +1,63 @@
+{
+  "name": "honion",
+  "version": "0.0.1-alpha",
+  "description": "通用洋葱模型中间件",
+  "engines": {
+    "node": ">=12.14.0"
+  },
+  "homepage": "https://github.com/hal-wang/honion",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hal-wang/honion"
+  },
+  "keywords": [
+    "honion",
+    "middleware"
+  ],
+  "bugs": {
+    "url": "https://github.com/hal-wang/honion/issues",
+    "email": "support@hal.wang"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "prebuild": "npm run lint",
+    "build": "rimraf ./dist/* && tsc",
+    "lint": "eslint src test --ext .ts",
+    "pretest": "npm run build",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.2.6",
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
+    "codecov": "^3.8.3",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.3.1",
+    "prettier": "^2.8.3",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^29.0.5",
+    "typescript": "4.9.4"
+  },
+  "author": "hal-wang",
+  "license": "MIT",
+  "files": [
+    "/dist/*",
+    "/src/*",
+    "/test/*",
+    ".eslintignore",
+    ".eslintrc.js",
+    ".gitignore",
+    "LICENSE",
+    "package.json",
+    "README.md",
+    "tsconfig.json"
+  ]
+}
