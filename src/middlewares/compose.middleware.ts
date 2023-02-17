@@ -3,9 +3,11 @@ import { LambdaMiddleware } from "./lambda.middleware";
 import { Middleware, MiddlewareItem, invokeMiddlewares } from "./middleware";
 import { initContainer, MiddlewareContainer } from "./middleware-container";
 
-export class ComposeMiddleware extends Middleware {
+export class ComposeMiddleware<
+  TC extends Context = Context
+> extends Middleware<TC> {
   constructor(
-    private readonly enable?: (ctx: Context) => boolean | Promise<boolean>
+    private readonly enable?: (ctx: TC) => boolean | Promise<boolean>
   ) {
     super();
     initContainer(this, this.#mds);
@@ -30,4 +32,5 @@ export class ComposeMiddleware extends Middleware {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ComposeMiddleware extends MiddlewareContainer {}
+export interface ComposeMiddleware<TC extends Context = Context>
+  extends MiddlewareContainer<TC> {}

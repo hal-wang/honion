@@ -3,17 +3,20 @@ import { HonionException } from "../exception";
 import { execHooks, HookType } from "./hook.middleware";
 import { LambdaMiddleware } from "./lambda.middleware";
 
-export type MiddlewareConstructor<T extends Middleware = Middleware> = {
-  new (...args: any[]): T;
+export type MiddlewareConstructor<
+  TC extends Context = Context,
+  TM extends Middleware<TC> = Middleware<TC>
+> = {
+  new (...args: any[]): TM;
 };
-function isMiddlewareConstructor<T extends Middleware = Middleware>(
+function isMiddlewareConstructor<TC extends Context>(
   md: any
-): md is MiddlewareConstructor<T> {
+): md is MiddlewareConstructor<TC> {
   return !!md.prototype;
 }
-function isMdClass<T extends Middleware = Middleware>(
+function isMdClass<TC extends Context>(
   val: any
-): val is MiddlewareConstructor<T> {
+): val is MiddlewareConstructor<TC> {
   return (
     typeof val == "function" &&
     /^class\s/.test(Function.prototype.toString.call(val))
@@ -47,12 +50,12 @@ export async function createMiddleware(
   }
 }
 
-export abstract class Middleware {
+export abstract class Middleware<TC extends Context = Context> {
   #index!: number;
   #mds!: readonly MiddlewareItem[];
 
-  #ctx!: Context;
-  public get ctx(): Context {
+  #ctx!: TC;
+  public get ctx(): TC {
     return this.#ctx;
   }
 
@@ -63,23 +66,23 @@ export abstract class Middleware {
     this.ctx.logger = val;
   }
 
-  public isPrevInstanceOf<T extends Middleware = Middleware>(
-    target: MiddlewareConstructor<T>
-  ): target is MiddlewareConstructor<T> {
+  public isPrevInstanceOf<TM extends Middleware<TC> = Middleware<TC>>(
+    target: MiddlewareConstructor<TC, TM>
+  ): target is MiddlewareConstructor<TC, TM> {
     const prevMd = this.#mds[this.#index - 1];
     return this.#isInstanceOf(prevMd, target);
   }
 
-  public isNextInstanceOf<T extends Middleware = Middleware>(
-    target: MiddlewareConstructor<T>
-  ): target is MiddlewareConstructor<T> {
+  public isNextInstanceOf<TM extends Middleware<TC> = Middleware<TC>>(
+    target: MiddlewareConstructor<TC, TM>
+  ): target is MiddlewareConstructor<TC, TM> {
     const nextMd = this.#mds[this.#index + 1];
     return this.#isInstanceOf(nextMd, target);
   }
 
-  #isInstanceOf<T extends Middleware = Middleware>(
+  #isInstanceOf<TM extends Middleware<TC> = Middleware<TC>>(
     md: MiddlewareItem | undefined,
-    target: MiddlewareConstructor<T>
+    target: MiddlewareConstructor<TC, TM>
   ) {
     if (!md) return false;
     if (md == target) return true;
@@ -130,11 +133,7 @@ export abstract class Middleware {
     return await createMiddleware(this.ctx, middleware);
   };
 
-  private init(
-    ctx: Context,
-    index: number,
-    mds: readonly MiddlewareItem[]
-  ): this {
+  private init(ctx: TC, index: number, mds: readonly MiddlewareItem[]): this {
     this.#mds = mds;
     this.#ctx = ctx;
     this.#index = index;

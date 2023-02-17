@@ -6,32 +6,32 @@ import {
   MiddlewareItem,
 } from "./middleware";
 
-export interface MiddlewareContainer {
-  use(lambda: (ctx: Context, next: () => Promise<void>) => Promise<void>): this;
-  use(lambda: (ctx: Context, next: () => Promise<void>) => void): this;
+export interface MiddlewareContainer<TC extends Context> {
+  use(lambda: (ctx: TC, next: () => Promise<void>) => Promise<void>): this;
+  use(lambda: (ctx: TC, next: () => Promise<void>) => void): this;
 
-  add(
-    builder: (ctx: Context) => Middleware,
-    type?: MiddlewareConstructor
+  add<TM extends Middleware<TC>>(
+    builder: (ctx: TC) => Middleware<TC>,
+    type?: MiddlewareConstructor<TC, TM>
   ): this;
-  add(
-    builder: (ctx: Context) => Promise<Middleware>,
-    type?: MiddlewareConstructor
+  add<TM extends Middleware<TC>>(
+    builder: (ctx: TC) => Promise<Middleware<TC>>,
+    type?: MiddlewareConstructor<TC, TM>
   ): this;
-  add(
-    builder: (ctx: Context) => MiddlewareConstructor,
-    type?: MiddlewareConstructor
+  add<TM extends Middleware<TC>>(
+    builder: (ctx: TC) => MiddlewareConstructor<TC, TM>,
+    type?: MiddlewareConstructor<TC, TM>
   ): this;
-  add(
-    builder: (ctx: Context) => Promise<MiddlewareConstructor>,
-    type?: MiddlewareConstructor
+  add<TM extends Middleware<TC>>(
+    builder: (ctx: TC) => Promise<MiddlewareConstructor<TC, TM>>,
+    type?: MiddlewareConstructor<TC, TM>
   ): this;
-  add(md: Middleware): this;
-  add(md: MiddlewareConstructor): this;
+  add(md: Middleware<TC>): this;
+  add<TM extends Middleware<TC>>(md: MiddlewareConstructor<TC, TM>): this;
 }
 
 export function initContainer(
-  container: MiddlewareContainer,
+  container: MiddlewareContainer<any>,
   mds: MiddlewareItem[]
 ) {
   container.use = (

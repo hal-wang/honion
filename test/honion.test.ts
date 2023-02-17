@@ -27,9 +27,11 @@ describe("invoke", () => {
 });
 
 describe("custom", () => {
-  class CustomHonion extends Honion {
-    async run(): Promise<Context> {
-      return await super.invoke(new Context());
+  class CustomContext extends Context {}
+
+  class CustomHonion extends Honion<CustomContext> {
+    async run(): Promise<CustomContext> {
+      return await super.invoke(new CustomContext());
     }
   }
 

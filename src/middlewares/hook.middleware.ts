@@ -3,19 +3,22 @@ import { Middleware, MiddlewareConstructor } from "./middleware";
 
 const MIDDLEWARE_HOOK_BAG = "@hal-wang/honion/middlewareHooksBag";
 
-export type MdHook<T extends Middleware | MiddlewareConstructor | Error = any> =
-  (
-    ctx: Context,
-    md: T,
-    error?: Error
-  ) =>
-    | void
-    | Promise<void | boolean>
-    | Middleware
-    | undefined
-    | Promise<Middleware | undefined>
-    | boolean
-    | Promise<boolean>;
+export type MdHook<
+  TC extends Context,
+  TM extends Middleware<TC>,
+  U extends TM | MiddlewareConstructor<TC> | Error = any
+> = (
+  ctx: TC,
+  md: U,
+  error?: Error
+) =>
+  | void
+  | Promise<void | boolean>
+  | TM
+  | undefined
+  | Promise<TM | undefined>
+  | boolean
+  | Promise<boolean>;
 
 export enum HookType {
   BeforeInvoke,
@@ -25,23 +28,26 @@ export enum HookType {
   Error,
 }
 
-export interface HookItem {
-  hook: MdHook;
+export interface HookItem<TC extends Context, TM extends Middleware<TC>> {
+  hook: MdHook<TC, TM>;
   type: HookType;
 }
 
-export class HookMiddleware extends Middleware {
-  constructor(mh: MdHook, type: HookType) {
+export class HookMiddleware<
+  TC extends Context,
+  TM extends Middleware<TC>
+> extends Middleware<TC> {
+  constructor(mh: MdHook<TC, TM>, type: HookType) {
     super();
     this.#mh = mh;
     this.#type = type;
   }
 
-  #mh: MdHook;
+  #mh: MdHook<TC, TM>;
   #type: HookType;
 
   async invoke(): Promise<void> {
-    const hooks = this.ctx.get<HookItem[]>(MIDDLEWARE_HOOK_BAG) ?? [];
+    const hooks = this.ctx.get<HookItem<TC, TM>[]>(MIDDLEWARE_HOOK_BAG) ?? [];
     hooks.push({ hook: this.#mh, type: this.#type });
     this.ctx.set(MIDDLEWARE_HOOK_BAG, hooks);
     await this.next();
@@ -81,7 +87,8 @@ export async function execHooks(
     return await execErrorHooks(ctx, middleware as Middleware, error as Error);
   }
 
-  const hooks = ctx.get<HookItem[]>(MIDDLEWARE_HOOK_BAG) ?? [];
+  const hooks =
+    ctx.get<HookItem<Context, Middleware>[]>(MIDDLEWARE_HOOK_BAG) ?? [];
   for (const hookItem of hooks.filter((h) => h.type == type)) {
     const hookResult = await hookItem.hook(ctx, middleware);
     if (typeof hookResult == "boolean" && !hookResult) {
@@ -95,7 +102,8 @@ async function execErrorHooks(
   middleware: Middleware,
   error: Error
 ): Promise<boolean> {
-  const hooks = ctx.get<HookItem[]>(MIDDLEWARE_HOOK_BAG) ?? [];
+  const hooks =
+    ctx.get<HookItem<Context, Middleware>[]>(MIDDLEWARE_HOOK_BAG) ?? [];
   let result = false;
   for (const hookItem of hooks.filter((h) => h.type == HookType.Error)) {
     result = (await hookItem.hook(ctx, middleware, error)) as boolean;
@@ -108,7 +116,8 @@ async function execConstructorHooks(
   ctx: Context,
   middleware: MiddlewareConstructor
 ): Promise<Middleware | undefined> {
-  const hooks = ctx.get<HookItem[]>(MIDDLEWARE_HOOK_BAG) ?? [];
+  const hooks =
+    ctx.get<HookItem<Context, Middleware>[]>(MIDDLEWARE_HOOK_BAG) ?? [];
   let result: Middleware | undefined;
   for (const hookItem of hooks.filter((h) => h.type == HookType.Constructor)) {
     if (!(middleware instanceof Middleware)) {
