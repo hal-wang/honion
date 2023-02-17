@@ -46,11 +46,6 @@ describe("error", () => {
     expect(exception.message).toBe("abc");
   });
 
-  it("should set message with string", () => {
-    const exception = new HonionException("abc");
-    expect(exception.message).toBe("abc");
-  });
-
   it("should set message with error", () => {
     const err = new Error("abc");
     const exception = new HonionException(err);

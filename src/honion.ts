@@ -36,13 +36,13 @@ export abstract class Honion<TC extends Context = Context> {
     ) => Promise<TM | undefined>
   ): this;
 
-  hook<TE extends Error = Error>(
+  hook<TM extends Middleware<TC> = Middleware<TC>, TE extends Error = Error>(
     type: HookType.Error,
-    mh: (ctx: TC, middleware: Middleware<TC>, error: TE) => boolean
+    mh: (ctx: TC, middleware: TM, error: TE) => boolean
   ): this;
-  hook<TE extends Error = Error>(
+  hook<TM extends Middleware<TC> = Middleware<TC>, TE extends Error = Error>(
     type: HookType.Error,
-    mh: (ctx: TC, middleware: Middleware<TC>, error: TE) => Promise<boolean>
+    mh: (ctx: TC, middleware: TM, error: TE) => Promise<boolean>
   ): this;
 
   hook<TM extends Middleware<TC> = Middleware<TC>>(
@@ -89,7 +89,7 @@ export abstract class Honion<TC extends Context = Context> {
     return this;
   }
 
-  protected async invoke(ctx?: TC): Promise<TC> {
+  protected async invoke(ctx?: any): Promise<any> {
     ctx = ctx ?? (new Context() as TC);
     Object.defineProperty(ctx, "honion", {
       configurable: true,

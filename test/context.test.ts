@@ -1,6 +1,7 @@
+import { Context } from "../src";
 import { TestHonion } from "./test-honion";
 
-async function getContext() {
+async function getContext(): Promise<Context> {
   return await new TestHonion().run();
 }
 
